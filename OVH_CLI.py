@@ -1,6 +1,9 @@
 import typer
 import csv
 import ovh
+import requests
+from typing import Optional
+from requests.exceptions import RequestException
 from dynaconf import Dynaconf
 from ovh.exceptions import ResourceNotFoundError, APIError
 from rich.console import Console
@@ -114,6 +117,44 @@ def get_all_ips():
     except (ResourceNotFoundError, APIError) as e:
         console.print(f"[red]Erro ao obter os IPs das VPS: {e}[/red]")
 
+def terminate_vps(vps_name: str, get_model: Optional[bool] = False):
+    """
+    Encerra uma VPS específica e, opcionalmente, obtém o modelo da VPS após a terminação.
+    """
+    try:
+        client = connect_to_ovh()
+        response = client.post(f"/vps/{vps_name}/terminate")
+
+        if isinstance(response, dict) and "token" in response:
+            token = response["token"]
+            client.post(f"/vps/{vps_name}/confirmTermination", data={"token": token})
+            console.print(f"[green]A VPS '{vps_name}' foi encerrada e a terminação foi confirmada com sucesso![/green]")
+        else:
+            console.print(f"[yellow]A terminação da VPS '{vps_name}' foi iniciada. Por favor, confirme a terminação via e-mail ou painel de controle OVH.[/yellow]")
+
+        if get_model:
+            get_vps_model(vps_name)
+    except (ResourceNotFoundError, APIError) as e:
+        console.print(f"[red]Erro ao encerrar a VPS '{vps_name}': {e}[/red]")
+
+def get_vps_model(vps_name: str):
+    """
+    Obtém o modelo da VPS específica.
+    """
+    try:
+        client = connect_to_ovh()
+
+        with console.status("[bold green]Obtendo modelo da VPS...") as status:
+            response = client.get(f"/vps/{vps_name}")
+
+            if response.get("model"):
+                console.print("[green]Modelo da VPS:")
+                console.print(response["model"])
+            else:
+                console.print("[yellow]Modelo não encontrado para esta VPS.[/yellow]")
+    except (ResourceNotFoundError, APIError) as e:
+        console.print(f"[red]Erro ao obter o modelo da VPS '{vps_name}': {e}[/red]")
+
 @app.command()
 def start():
     """
@@ -121,9 +162,8 @@ def start():
     """
     console.print("[bold cyan]Aplicação iniciada...[/bold cyan]")
 
-    # Loop infinito para aguardar novos comandos
     while True:
-        command = typer.prompt("Digite o comando (ex: reboot <VPS>, name <VPS>, list, count, ips)")
+        command = typer.prompt("Digite o comando (ex: reboot <VPS>, name <VPS>, list, count, ips, model <VPS>, t <VPS>)")
         command_parts = command.split()
         
         if len(command_parts) >= 2:
@@ -131,8 +171,12 @@ def start():
                 reboot_vps(command_parts[1])
             elif command_parts[0] == "name":
                 name_vps(command_parts[1])
+            elif command_parts[0] == "t":
+                terminate_vps(command_parts[1], get_model=True)
+            elif command_parts[0] == "model":
+                get_vps_model(command_parts[1])
             else:
-                console.print("[red]Comando inválido. Use 'reboot <VPS>' ou 'name <VPS>'[/red]")
+                console.print("[red]Comando inválido. Use 'reboot <VPS>', 'name <VPS>', 'model <VPS>', ou 't <VPS>'[/red]")
         elif len(command_parts) == 1:
             if command_parts[0] == "list":
                 list_vps()
@@ -141,9 +185,9 @@ def start():
             elif command_parts[0] == "ips":
                 get_all_ips()
             else:
-                console.print("[red]Comando inválido. Use 'reboot <VPS>', 'name <VPS>', 'list', 'count' ou 'ips'[/red]")
+                console.print("[red]Comando inválido. Use 'reboot <VPS>', 'name <VPS>', 'list', 'count', 'ips', 'model <VPS>', ou 't <VPS>'[/red]")
         else:
-            console.print("[red]Comando inválido. Use 'reboot <VPS>', 'name <VPS>', 'list', 'count' ou 'ips'[/red]")
+            console.print("[red]Comando inválido. Use 'reboot <VPS>', 'name <VPS>', 'list', 'count', 'ips', 'model <VPS>', ou 't <VPS>'[/red]")
 
 if __name__ == "__main__":
     app()
