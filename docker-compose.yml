@@ -2,8 +2,10 @@ version: '3.8'
 
 services:
   ovh_cli:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - ./settings.yml:/app/settings.yml
-    command: python OVH_CLI.py
-    tty: true
+      - ./OVH_CLI.py:/app/OVH_CLI.py
+      - ./requirements.txt:/app/requirements.txt
+    command: ["python", "OVH_CLI.py", "start"]

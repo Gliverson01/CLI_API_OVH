@@ -4,15 +4,8 @@ import ovh
 import requests
 from typing import Optional
 from requests.exceptions import RequestException
-from dynaconf import Dynaconf
 from ovh.exceptions import ResourceNotFoundError, APIError
 from rich.console import Console
-
-# Carregar as configurações do arquivo settings.yml
-try:
-    settings = Dynaconf(settings_files=['/home/matheus/CLI_INFRA/CLI_API_OVH/settings.yml'])
-except Exception as e:
-    raise FileNotFoundError("Erro ao carregar o arquivo de configuração: settings.yml") from e
 
 # Criando uma instância do aplicativo Typer
 app = typer.Typer()
@@ -20,16 +13,22 @@ app = typer.Typer()
 # Criando uma instância do console rich
 console = Console()
 
+# Configurações da API da OVH (substitua pelos seus valores)
+OVH_ENDPOINT = "ovh-ca"
+APPLICATION_KEY = "sua-app-key"
+APPLICATION_SECRET = "sua-app-secret"
+CONSUMER_KEY = "sua-consumer-key"
+
 def connect_to_ovh():
     """
     Estabelece a conexão com a API da OVH e retorna um cliente OVH.
     """
     try:
         return ovh.Client(
-            endpoint=settings.ovh.endpoint,
-            application_key=settings.ovh.application_key,
-            application_secret=settings.ovh.application_secret,
-            consumer_key=settings.ovh.consumer_key
+            endpoint=OVH_ENDPOINT,
+            application_key=APPLICATION_KEY,
+            application_secret=APPLICATION_SECRET,
+            consumer_key=CONSUMER_KEY
         )
     except Exception as e:
         console.print(f"[red]Erro ao conectar com a API da OVH: {e}[/red]")

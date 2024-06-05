@@ -1,6 +1,0 @@
-# settings.yml
-ovh:
-  endpoint: 'ovh-ca'
-  application_key: ''
-  application_secret: ''
-  consumer_key: ''
