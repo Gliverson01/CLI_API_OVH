@@ -1,9 +1,0 @@
-version: '3.8'
-
-services:
-  ovh_cli:
-    build: .
-    volumes:
-      - ./settings.yml:/app/settings.yml
-    command: python OVH_CLI.py
-    tty: true

@@ -1,6 +1,0 @@
-typer
-ovh
-requests
-dynaconf
-rich
-
