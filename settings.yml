@@ -1,6 +1,6 @@
 # settings.yml
 ovh:
   endpoint: 'ovh-ca'
-  application_key: '6c4811cab80aeb46'
-  application_secret: '16f8f4cf3247c72e737e502055295bb8'
-  consumer_key: '79a287c51118b021a769d3c474749724'
+  application_key: ''
+  application_secret: ''
+  consumer_key: ''
