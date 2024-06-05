@@ -10,7 +10,7 @@ from rich.console import Console
 
 # Carregar as configurações do arquivo settings.yml
 try:
-    settings = Dynaconf(settings_files=['/root/vars/settings.yml'])
+    settings = Dynaconf(settings_files=['/home/matheus/CLI_INFRA/CLI_API_OVH/settings.yml'])
 except Exception as e:
     raise FileNotFoundError("Erro ao carregar o arquivo de configuração: settings.yml") from e
 
